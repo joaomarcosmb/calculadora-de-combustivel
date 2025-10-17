@@ -14,6 +14,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.pdm.calculadoradecombustivel.ui.theme.CalculadoraDeCombustivelTheme
+import java.util.Locale
+import java.text.NumberFormat
+import java.text.ParseException
+
+val BR_LOCALE: Locale = Locale.Builder()
+    .setLanguage("pt")
+    .setRegion("BR")
+    .build()
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -142,8 +150,8 @@ fun CalculadoraDeCombustivelScreen() {
         Button(
             onClick = {
                 resultMessage = calcularMelhorCombustivel(
-                    alcoholPrice.toDoubleOrNull(),
-                    gasolinePrice.toDoubleOrNull(),
+                    convPrecoBR(alcoholPrice),
+                    convPrecoBR(gasolinePrice),
                     use75Percent,
                     gasStationName
                 )
@@ -189,21 +197,31 @@ fun calcularMelhorCombustivel(
         return "Os preços devem ser maiores que zero."
     }
 
-    val threshold = if (use75Percent) 0.75 else 0.70
-    val ratio = alcoholPrice / gasolinePrice
+    val threshold = if (use75Percent) 75.0 else 70.0
+    val ratio = (alcoholPrice / gasolinePrice) * 100.0
+    val ratioFormatted = String.format(BR_LOCALE, "%.1f", ratio)
     val stationInfo = if (gasStationName.isNotBlank()) " no posto $gasStationName" else ""
 
     return when {
         ratio <= threshold -> {
-            "✓ Abasteça com ÁLCOOL$stationInfo!\n" +
-                    "O álcool está ${String.format("%.1f", ratio * 100)}% do preço da gasolina, " +
-                    "abaixo do limite de ${(threshold * 100).toInt()}%."
+            "✅ Abasteça com ÁLCOOL$stationInfo!\n" +
+                    "O álcool está ${ratioFormatted}% do preço da gasolina, " +
+                    "abaixo do limite de ${(threshold).toInt()}%."
         }
 
         else -> {
-            "✓ Abasteça com GASOLINA$stationInfo!\n" +
-                    "O álcool está ${String.format("%.1f", ratio * 100)}% do preço da gasolina, " +
-                    "acima do limite de ${(threshold * 100).toInt()}%."
+            "✅ Abasteça com GASOLINA$stationInfo!\n" +
+                    "O álcool está ${ratioFormatted}% do preço da gasolina, " +
+                    "acima do limite de ${(threshold).toInt()}%."
         }
+    }
+}
+
+fun convPrecoBR(value: String): Double? {
+    return try {
+        val formatador = NumberFormat.getInstance(BR_LOCALE)
+        formatador.parse(value)?.toDouble()
+    } catch (e: ParseException) {
+        null
     }
 }
