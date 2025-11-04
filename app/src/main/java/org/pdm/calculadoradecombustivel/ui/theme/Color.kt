@@ -16,6 +16,9 @@ val OnSecondaryContainerLight = Color(0xFF394379)
 val BackgroundLight = Color(0xFFF5FBF8)
 val SurfaceLight = Color(0xFFF5FBF8)
 
+val DangerButtonLight = Color(0x80FF0000)
+val NeutralButtonContentLight = Color(0xB3000000)
+
 // Cores para tema escuro
 val PrimaryDark = Color(0xFFBAC3FF)
 val OnPrimaryDark = Color(0xFF222C61)
@@ -29,3 +32,6 @@ val OnSecondaryContainerDark = Color(0xFFDEE1FF)
 
 val BackgroundDark = Color(0xFF0F1513)
 val SurfaceDark = Color(0xFF0F1513)
+
+val DangerButtonDark = Color(0xFFB3261E)
+val NeutralButtonContentDark = Color(0xB3000000)

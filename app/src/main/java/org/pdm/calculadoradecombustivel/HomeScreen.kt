@@ -21,10 +21,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import org.pdm.calculadoradecombustivel.ui.theme.extendedColors
 
 @Composable
 fun HomeScreen(
@@ -148,14 +148,14 @@ fun HomeScreen(
                     .height(48.dp),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (isEditing) {
-                        Color.Red.copy(alpha = 0.5f)
+                        MaterialTheme.extendedColors.dangerButtonBackground
                     } else {
                         MaterialTheme.colorScheme.primaryContainer
                     },
                     contentColor = if (isEditing) {
-                        Color.White
+                        MaterialTheme.colorScheme.onPrimary
                     } else {
-                        Color.Black.copy(alpha = 0.7f)
+                        MaterialTheme.extendedColors.neutralButtonContent
                     }
                 )
             ) {
