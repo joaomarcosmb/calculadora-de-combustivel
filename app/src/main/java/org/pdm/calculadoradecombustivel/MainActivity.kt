@@ -1,9 +1,17 @@
 package org.pdm.calculadoradecombustivel
 
+import android.Manifest
+import android.content.Context
+import android.content.pm.PackageManager
+import android.location.Geocoder
+import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresPermission
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,16 +33,22 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
+import androidx.core.content.ContextCompat
+import com.google.android.gms.location.LocationServices
+import com.google.android.gms.location.Priority
+import com.google.android.gms.tasks.CancellationTokenSource
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -118,6 +132,32 @@ private fun List<GasStation>.toJsonStorage(): String {
     return jsonArray.toString()
 }
 
+private suspend fun resolveAddressFromCoordinates(
+    context: Context,
+    latitude: Double,
+    longitude: Double
+): String = withContext(Dispatchers.IO) {
+    runCatching {
+        val geocoder = Geocoder(context, BR_LOCALE)
+        val results = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            geocoder.getFromLocation(latitude, longitude, 1)
+        } else {
+            @Suppress("DEPRECATION")
+            geocoder.getFromLocation(latitude, longitude, 1)
+        }
+        val address = results?.firstOrNull()
+        address?.let {
+            listOfNotNull(
+                it.thoroughfare,
+                it.subThoroughfare,
+                it.subLocality,
+                it.locality,
+                it.adminArea
+            ).joinToString(", ")
+        }
+    }.getOrNull() ?: String.format(BR_LOCALE, "%.5f, %.5f", latitude, longitude)
+}
+
 fun formatCurrencyBR(value: Double): String {
     val formatter = NumberFormat.getCurrencyInstance(BR_LOCALE)
     return formatter.format(value)
@@ -166,6 +206,106 @@ fun CalculadoraDeCombustivelScreen() {
     var resultMessage by rememberSaveable { mutableStateOf("") }
     var editingStationId by rememberSaveable { mutableStateOf<String?>(null) }
     var currentScreenName by rememberSaveable { mutableStateOf(AppScreen.HOME.name) }
+    var isRequestingLocation by remember { mutableStateOf(false) }
+
+    val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
+
+    fun showLocationError(message: String = "Não foi possível obter a localização.") {
+        Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
+    }
+
+    fun updateLocationFromCoordinates(latitude: Double, longitude: Double) {
+        coroutineScope.launch {
+            try {
+                val resolvedLocation = resolveAddressFromCoordinates(context, latitude, longitude)
+                gasStationLocation = resolvedLocation
+            } finally {
+                isRequestingLocation = false
+            }
+        }
+    }
+
+    @RequiresPermission(allOf = [Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION])
+    fun requestCurrentLocation() {
+        if (isRequestingLocation) return
+        isRequestingLocation = true
+        val cancellationTokenSource = CancellationTokenSource()
+        val hasFineLocation = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+        val hasCoarseLocation = ContextCompat.checkSelfPermission(
+            context,
+            Manifest.permission.ACCESS_COARSE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED
+
+        if (!hasFineLocation && !hasCoarseLocation) {
+            isRequestingLocation = false
+            showLocationError("Permissão de localização ausente.")
+            return
+        }
+
+        try {
+            fusedLocationClient.getCurrentLocation(
+                Priority.PRIORITY_BALANCED_POWER_ACCURACY,
+                cancellationTokenSource.token
+            ).addOnSuccessListener { location ->
+                if (location != null) {
+                    cancellationTokenSource.cancel()
+                    updateLocationFromCoordinates(location.latitude, location.longitude)
+                } else {
+                    cancellationTokenSource.cancel()
+                    fusedLocationClient.lastLocation
+                        .addOnSuccessListener { lastLocation ->
+                            if (lastLocation != null) {
+                                updateLocationFromCoordinates(lastLocation.latitude, lastLocation.longitude)
+                            } else {
+                                isRequestingLocation = false
+                                showLocationError()
+                            }
+                        }
+                        .addOnFailureListener {
+                            isRequestingLocation = false
+                            showLocationError()
+                        }
+                }
+            }.addOnFailureListener {
+                cancellationTokenSource.cancel()
+                isRequestingLocation = false
+                showLocationError()
+            }
+        } catch (securityException: SecurityException) {
+            cancellationTokenSource.cancel()
+            isRequestingLocation = false
+            showLocationError()
+        }
+    }
+
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            requestCurrentLocation()
+        } else {
+            showLocationError("Permissão de localização negada.")
+        }
+    }
+
+    fun startLocationRequest() {
+        if (isRequestingLocation) return
+        when {
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.ACCESS_FINE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                requestCurrentLocation()
+            }
+
+            else -> {
+                permissionLauncher.launch(Manifest.permission.ACCESS_FINE_LOCATION)
+            }
+        }
+    }
 
     val savedStations = remember { mutableStateListOf<GasStation>() }
     var selectedStation by remember { mutableStateOf<GasStation?>(null) }
@@ -287,7 +427,7 @@ fun CalculadoraDeCombustivelScreen() {
         resetForm()
     }
 
-    val navItems = remember { AppScreen.values().toList() }
+    val navItems = remember { AppScreen.entries }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
@@ -320,6 +460,8 @@ fun CalculadoraDeCombustivelScreen() {
                     onGasStationNameChange = { gasStationName = it },
                     gasStationLocation = gasStationLocation,
                     onGasStationLocationChange = { gasStationLocation = it },
+                    onRequestLocation = { startLocationRequest() },
+                    isRequestingLocation = isRequestingLocation,
                     use75Percent = use75Percent,
                     onSwitchChange = { checked ->
                         use75Percent = checked
