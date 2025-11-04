@@ -2,9 +2,11 @@ package org.pdm.calculadoradecombustivel
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
 import android.location.Address
 import android.location.Geocoder
+import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
@@ -13,8 +15,6 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresPermission
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.List
@@ -40,7 +40,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.unit.dp
 import androidx.datastore.preferences.core.edit
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.LocationServices
@@ -64,6 +63,7 @@ import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import kotlin.coroutines.resume
+import androidx.core.net.toUri
 
 val BR_LOCALE: Locale = Locale.Builder()
     .setLanguage("pt")
@@ -333,7 +333,7 @@ fun CalculadoraDeCombustivelScreen() {
     }
 
     val savedStations = remember { mutableStateListOf<GasStation>() }
-    var selectedStation by remember { mutableStateOf<GasStation?>(null) }
+    var stationPendingMap by remember { mutableStateOf<GasStation?>(null) }
 
     val currentScreen = AppScreen.valueOf(currentScreenName)
 
@@ -383,7 +383,7 @@ fun CalculadoraDeCombustivelScreen() {
         alcoholPrice = formatNumberForInput(station.alcoholPrice)
         gasolinePrice = formatNumberForInput(station.gasolinePrice)
         resultMessage = ""
-        selectedStation = null
+        stationPendingMap = null
         navigateTo(AppScreen.HOME)
     }
 
@@ -395,10 +395,31 @@ fun CalculadoraDeCombustivelScreen() {
             if (editingStationId == station.id) {
                 resetForm()
             }
-            if (selectedStation?.id == station.id) {
-                selectedStation = null
+            if (stationPendingMap?.id == station.id) {
+                stationPendingMap = null
             }
             Toast.makeText(context, "Posto excluído.", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    fun openStationInMaps(station: GasStation) {
+        val locationText = station.location.trim()
+        if (locationText.isEmpty() || locationText.equals("Localização não informada", ignoreCase = true)) {
+            Toast.makeText(context, "Este posto não possui localização disponível.", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        val geoUri = "geo:0,0?q=${Uri.encode(locationText)}".toUri()
+        val mapsIntent = Intent(Intent.ACTION_VIEW, geoUri).apply {
+            setPackage("com.google.android.apps.maps")
+        }
+
+        val fallbackIntent = Intent(Intent.ACTION_VIEW, geoUri)
+        val packageManager = context.packageManager
+        when {
+            mapsIntent.resolveActivity(packageManager) != null -> context.startActivity(mapsIntent)
+            fallbackIntent.resolveActivity(packageManager) != null -> context.startActivity(fallbackIntent)
+            else -> Toast.makeText(context, "Nenhum aplicativo de mapas disponível.", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -518,7 +539,14 @@ fun CalculadoraDeCombustivelScreen() {
             AppScreen.LIST -> {
                 StationListScreen(
                     stations = savedStations,
-                    onStationClick = { station -> selectedStation = station },
+                    onStationClick = { station ->
+                        val locationText = station.location.trim()
+                        if (locationText.isEmpty() || locationText.equals("Localização não informada", ignoreCase = true)) {
+                            Toast.makeText(context, "Este posto não possui localização disponível.", Toast.LENGTH_SHORT).show()
+                        } else {
+                            stationPendingMap = station
+                        }
+                    },
                     onEdit = { station -> startEditing(station) },
                     onDelete = { station -> deleteStation(station) },
                     contentPadding = innerPadding
@@ -528,21 +556,28 @@ fun CalculadoraDeCombustivelScreen() {
     }
 
     if (currentScreen == AppScreen.LIST) {
-        selectedStation?.let { station ->
+        stationPendingMap?.let { station ->
             AlertDialog(
-                onDismissRequest = { selectedStation = null },
-                title = { Text(text = station.name) },
+                onDismissRequest = { stationPendingMap = null },
+                title = { Text(text = "Abrir localização") },
                 text = {
-                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                        Text(text = "Álcool: ${formatCurrencyBR(station.alcoholPrice)}")
-                        Text(text = "Gasolina: ${formatCurrencyBR(station.gasolinePrice)}")
-                        Text(text = "Localização: ${station.location}")
-                        Text(text = "Data do cadastro: ${formatDateBR(station.createdAt)}")
-                    }
+                    Text(
+                        text = "Deseja ver este posto no aplicativo de mapas?"
+                    )
                 },
                 confirmButton = {
-                    TextButton(onClick = { selectedStation = null }) {
-                        Text(text = "Fechar")
+                    TextButton(
+                        onClick = {
+                            openStationInMaps(station)
+                            stationPendingMap = null
+                        }
+                    ) {
+                        Text(text = "Abrir")
+                    }
+                },
+                dismissButton = {
+                    TextButton(onClick = { stationPendingMap = null }) {
+                        Text(text = "Cancelar")
                     }
                 }
             )
