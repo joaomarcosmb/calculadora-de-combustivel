@@ -3,6 +3,7 @@ package org.pdm.calculadoradecombustivel
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
+import android.location.Address
 import android.location.Geocoder
 import android.os.Build
 import android.os.Bundle
@@ -49,6 +50,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.suspendCancellableCoroutine
 import org.json.JSONArray
 import org.json.JSONException
 import org.json.JSONObject
@@ -61,6 +63,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import kotlin.coroutines.resume
 
 val BR_LOCALE: Locale = Locale.Builder()
     .setLanguage("pt")
@@ -139,12 +142,7 @@ private suspend fun resolveAddressFromCoordinates(
 ): String = withContext(Dispatchers.IO) {
     runCatching {
         val geocoder = Geocoder(context, BR_LOCALE)
-        val results = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            geocoder.getFromLocation(latitude, longitude, 1)
-        } else {
-            @Suppress("DEPRECATION")
-            geocoder.getFromLocation(latitude, longitude, 1)
-        }
+        val results = geocoder.getFromLocationCompat(latitude, longitude, 1)
         val address = results?.firstOrNull()
         address?.let {
             listOfNotNull(
@@ -156,6 +154,33 @@ private suspend fun resolveAddressFromCoordinates(
             ).joinToString(", ")
         }
     }.getOrNull() ?: String.format(BR_LOCALE, "%.5f, %.5f", latitude, longitude)
+}
+
+private suspend fun Geocoder.getFromLocationCompat(
+    latitude: Double,
+    longitude: Double,
+    maxResults: Int
+): List<Address>? {
+    return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        suspendCancellableCoroutine { continuation ->
+            getFromLocation(latitude, longitude, maxResults, object : Geocoder.GeocodeListener {
+                override fun onGeocode(addresses: MutableList<Address>) {
+                    if (continuation.isActive) {
+                        continuation.resume(addresses)
+                    }
+                }
+
+                override fun onError(errorMessage: String?) {
+                    if (continuation.isActive) {
+                        continuation.resume(null)
+                    }
+                }
+            })
+        }
+    } else {
+        @Suppress("DEPRECATION")
+        getFromLocation(latitude, longitude, maxResults)
+    }
 }
 
 fun formatCurrencyBR(value: Double): String {
