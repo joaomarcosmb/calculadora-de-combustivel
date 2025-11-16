@@ -34,6 +34,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.pdm.calculadoradecombustivel.ui.theme.extendedColors
+import androidx.compose.ui.res.stringResource
 
 @Composable
 fun HomeScreen(
@@ -69,7 +70,7 @@ fun HomeScreen(
             verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
             Text(
-                text = "Calculadora de Combustível",
+                text = stringResource(R.string.home_title),
                 fontSize = 24.sp,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.primary,
@@ -83,7 +84,7 @@ fun HomeScreen(
                 OutlinedTextField(
                     value = alcoholPrice,
                     onValueChange = onAlcoholPriceChange,
-                    label = { Text("Preço do álcool (R$)") },
+                    label = { Text(stringResource(R.string.home_alcohol_price_label)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -95,7 +96,7 @@ fun HomeScreen(
                 OutlinedTextField(
                     value = gasolinePrice,
                     onValueChange = onGasolinePriceChange,
-                    label = { Text("Preço da gasolina (R$)") },
+                    label = { Text(stringResource(R.string.home_gasoline_price_label)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     colors = OutlinedTextFieldDefaults.colors(
@@ -108,7 +109,7 @@ fun HomeScreen(
             OutlinedTextField(
                 value = gasStationName,
                 onValueChange = onGasStationNameChange,
-                label = { Text("Nome do posto") },
+                label = { Text(stringResource(R.string.home_station_name_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 colors = OutlinedTextFieldDefaults.colors(
@@ -120,7 +121,7 @@ fun HomeScreen(
             OutlinedTextField(
                 value = gasStationLocation,
                 onValueChange = onGasStationLocationChange,
-                label = { Text("Localização do posto") },
+                label = { Text(stringResource(R.string.home_station_location_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 trailingIcon = {
@@ -133,7 +134,7 @@ fun HomeScreen(
                         IconButton(onClick = onRequestLocation) {
                             Icon(
                                 imageVector = Icons.Filled.LocationOn,
-                                contentDescription = "Usar minha localização"
+                                contentDescription = stringResource(R.string.home_use_my_location_desc)
                             )
                         }
                     }
@@ -185,7 +186,7 @@ fun HomeScreen(
                     )
                 ) {
                     Text(
-                        text = if (isEditing) "Cancelar" else "Calcular",
+                        text = if (isEditing) stringResource(R.string.cancel) else stringResource(R.string.home_calculate_button),
                         fontSize = 16.sp,
                         fontWeight = FontWeight.Medium
                     )
@@ -202,7 +203,7 @@ fun HomeScreen(
                         )
                     ) {
                         Text(
-                            text = "Atualizar posto",
+                            text = stringResource(R.string.home_update_station_button),
                             fontSize = 16.sp,
                             fontWeight = FontWeight.SemiBold
                         )
@@ -238,7 +239,7 @@ fun HomeScreen(
             ) {
                 Icon(
                     imageVector = Icons.Filled.Add,
-                    contentDescription = "Adicionar posto"
+                    contentDescription = stringResource(R.string.home_add_station_fab_desc)
                 )
             }
         }

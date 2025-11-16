@@ -64,7 +64,8 @@ import java.util.Locale
 import java.util.UUID
 import kotlin.coroutines.resume
 import androidx.core.net.toUri
-
+import androidx.annotation.StringRes
+import androidx.compose.ui.res.stringResource
 val BR_LOCALE: Locale = Locale.Builder()
     .setLanguage("pt")
     .setRegion("BR")
@@ -72,9 +73,9 @@ val BR_LOCALE: Locale = Locale.Builder()
 
 private const val MAX_STATIONS = 10
 
-private enum class AppScreen(val label: String, val icon: ImageVector) {
-    HOME(label = "Início", icon = Icons.Filled.Home),
-    LIST(label = "Postos", icon = Icons.AutoMirrored.Filled.List)
+private enum class AppScreen(@StringRes val labelResId: Int, val icon: ImageVector) {
+    HOME(labelResId = R.string.screen_home, icon = Icons.Filled.Home),
+    LIST(labelResId = R.string.screen_stations, icon = Icons.AutoMirrored.Filled.List)
 }
 
 data class GasStation(
@@ -86,7 +87,7 @@ data class GasStation(
     val createdAt: Long
 )
 
-private fun parseStoredStations(raw: String?): List<GasStation> {
+private fun parseStoredStations(raw: String?, context: Context): List<GasStation> {
     if (raw.isNullOrEmpty()) return emptyList()
     return try {
         val jsonArray = JSONArray(raw)
@@ -103,11 +104,11 @@ private fun parseStoredStations(raw: String?): List<GasStation> {
                         id = jsonObject.optString("id")
                             .takeIf { it.isNotBlank() } ?: UUID.randomUUID().toString(),
                         name = jsonObject.optString("name")
-                            .takeIf { it.isNotBlank() } ?: "Posto sem nome",
+                            .takeIf { it.isNotBlank() } ?: context.getString(R.string.default_station_name),
                         alcoholPrice = alcoholPrice,
                         gasolinePrice = gasolinePrice,
                         location = jsonObject.optString("location")
-                            .takeIf { it.isNotBlank() } ?: "Localização não informada",
+                            .takeIf { it.isNotBlank() } ?: context.getString(R.string.default_station_location),
                         createdAt = jsonObject.optLong("createdAt").takeIf { it != 0L }
                             ?: System.currentTimeMillis()
                     )
@@ -235,7 +236,7 @@ fun CalculadoraDeCombustivelScreen() {
 
     val fusedLocationClient = remember { LocationServices.getFusedLocationProviderClient(context) }
 
-    fun showLocationError(message: String = "Não foi possível obter a localização.") {
+    fun showLocationError(message: String = context.getString(R.string.toast_location_error)) {
         Toast.makeText(context, message, Toast.LENGTH_SHORT).show()
     }
 
@@ -266,7 +267,7 @@ fun CalculadoraDeCombustivelScreen() {
 
         if (!hasFineLocation && !hasCoarseLocation) {
             isRequestingLocation = false
-            showLocationError("Permissão de localização ausente.")
+            showLocationError(context.getString(R.string.toast_location_permission_missing))
             return
         }
 
@@ -312,7 +313,7 @@ fun CalculadoraDeCombustivelScreen() {
         if (isGranted) {
             requestCurrentLocation()
         } else {
-            showLocationError("Permissão de localização negada.")
+            showLocationError(context.getString(R.string.toast_location_permission_denied))
         }
     }
 
@@ -344,7 +345,7 @@ fun CalculadoraDeCombustivelScreen() {
                 use75Percent = storedUse75
             }
 
-            val storedStations = parseStoredStations(preferences[FuelPreferencesKeys.stations])
+            val storedStations = parseStoredStations(preferences[FuelPreferencesKeys.stations], context)
             if (storedStations != savedStations.toList()) {
                 savedStations.clear()
                 savedStations.addAll(storedStations)
@@ -398,14 +399,15 @@ fun CalculadoraDeCombustivelScreen() {
             if (stationPendingMap?.id == station.id) {
                 stationPendingMap = null
             }
-            Toast.makeText(context, "Posto excluído.", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.toast_station_deleted), Toast.LENGTH_SHORT).show()
         }
     }
 
     fun openStationInMaps(station: GasStation) {
         val locationText = station.location.trim()
-        if (locationText.isEmpty() || locationText.equals("Localização não informada", ignoreCase = true)) {
-            Toast.makeText(context, "Este posto não possui localização disponível.", Toast.LENGTH_SHORT).show()
+        val defaultLocation = context.getString(R.string.default_station_location)
+        if (locationText.isEmpty() || locationText.equals(defaultLocation, ignoreCase = true)) {
+            Toast.makeText(context, context.getString(R.string.toast_station_no_location), Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -419,18 +421,18 @@ fun CalculadoraDeCombustivelScreen() {
         when {
             mapsIntent.resolveActivity(packageManager) != null -> context.startActivity(mapsIntent)
             fallbackIntent.resolveActivity(packageManager) != null -> context.startActivity(fallbackIntent)
-            else -> Toast.makeText(context, "Nenhum aplicativo de mapas disponível.", Toast.LENGTH_SHORT).show()
+            else -> Toast.makeText(context, context.getString(R.string.toast_no_maps_app), Toast.LENGTH_SHORT).show()
         }
     }
 
     fun saveStation() {
-        val alcoholValue = convPrecoBR(alcoholPrice)
-        val gasolineValue = convPrecoBR(gasolinePrice)
+        val alcoholValue = parsePriceBr(alcoholPrice)
+        val gasolineValue = parsePriceBr(gasolinePrice)
 
         if (alcoholValue == null || gasolineValue == null) {
             Toast.makeText(
                 context,
-                "Informe valores válidos para salvar o posto.",
+                context.getString(R.string.toast_invalid_values),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -439,7 +441,7 @@ fun CalculadoraDeCombustivelScreen() {
         if (editingStationId == null && savedStations.size >= MAX_STATIONS) {
             Toast.makeText(
                 context,
-                "Limite de $MAX_STATIONS postos atingido.",
+                context.getString(R.string.toast_station_limit_reached, MAX_STATIONS),
                 Toast.LENGTH_SHORT
             ).show()
             return
@@ -451,21 +453,21 @@ fun CalculadoraDeCombustivelScreen() {
 
         val updatedStation = GasStation(
             id = existingStation?.id ?: UUID.randomUUID().toString(),
-            name = gasStationName.ifBlank { "Posto sem nome" },
+            name = gasStationName.ifBlank { context.getString(R.string.default_station_name) },
             alcoholPrice = alcoholValue,
             gasolinePrice = gasolineValue,
-            location = gasStationLocation.ifBlank { "Localização não informada" },
+            location = gasStationLocation.ifBlank { context.getString(R.string.default_station_location) },
             createdAt = existingStation?.createdAt ?: System.currentTimeMillis()
         )
 
         if (existingStation == null) {
             savedStations.add(0, updatedStation)
-            Toast.makeText(context, "Posto salvo com sucesso!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, context.getString(R.string.toast_station_saved), Toast.LENGTH_SHORT).show()
         } else {
             val index = savedStations.indexOfFirst { it.id == existingStation.id }
             if (index >= 0) {
                 savedStations[index] = updatedStation
-                Toast.makeText(context, "Posto atualizado!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, context.getString(R.string.toast_station_updated), Toast.LENGTH_SHORT).show()
             }
         }
 
@@ -486,10 +488,10 @@ fun CalculadoraDeCombustivelScreen() {
                         icon = {
                             Icon(
                                 imageVector = screen.icon,
-                                contentDescription = screen.label
+                                contentDescription = stringResource(screen.labelResId)
                             )
                         },
-                        label = { Text(text = screen.label) }
+                        label = { Text(text = stringResource(screen.labelResId)) }
                     )
                 }
             }
@@ -519,9 +521,10 @@ fun CalculadoraDeCombustivelScreen() {
                     },
                     onSaveStation = { saveStation() },
                     onCalculate = {
-                        resultMessage = calcularMelhorCombustivel(
-                            convPrecoBR(alcoholPrice),
-                            convPrecoBR(gasolinePrice),
+                        resultMessage = calculateBestFuel(
+                            context,
+                            parsePriceBr(alcoholPrice),
+                            parsePriceBr(gasolinePrice),
                             use75Percent,
                             gasStationName
                         )
@@ -541,8 +544,9 @@ fun CalculadoraDeCombustivelScreen() {
                     stations = savedStations,
                     onStationClick = { station ->
                         val locationText = station.location.trim()
-                        if (locationText.isEmpty() || locationText.equals("Localização não informada", ignoreCase = true)) {
-                            Toast.makeText(context, "Este posto não possui localização disponível.", Toast.LENGTH_SHORT).show()
+                        val defaultLocation = context.getString(R.string.default_station_location)
+                        if (locationText.isEmpty() || locationText.equals(defaultLocation, ignoreCase = true)) {
+                            Toast.makeText(context, context.getString(R.string.toast_station_no_location), Toast.LENGTH_SHORT).show()
                         } else {
                             stationPendingMap = station
                         }
@@ -559,10 +563,10 @@ fun CalculadoraDeCombustivelScreen() {
         stationPendingMap?.let { station ->
             AlertDialog(
                 onDismissRequest = { stationPendingMap = null },
-                title = { Text(text = "Abrir localização") },
+                title = { Text(text = stringResource(R.string.dialog_open_maps_title)) },
                 text = {
                     Text(
-                        text = "Deseja ver este posto no aplicativo de mapas?"
+                        text = stringResource(R.string.dialog_open_maps_message)
                     )
                 },
                 confirmButton = {
@@ -572,12 +576,12 @@ fun CalculadoraDeCombustivelScreen() {
                             stationPendingMap = null
                         }
                     ) {
-                        Text(text = "Abrir")
+                        Text(text = stringResource(R.string.open))
                     }
                 },
                 dismissButton = {
                     TextButton(onClick = { stationPendingMap = null }) {
-                        Text(text = "Cancelar")
+                        Text(text = stringResource(R.string.cancel))
                     }
                 }
             )
@@ -586,44 +590,53 @@ fun CalculadoraDeCombustivelScreen() {
 }
 
 
-fun calcularMelhorCombustivel(
+fun calculateBestFuel(
+    context: Context,
     alcoholPrice: Double?,
     gasolinePrice: Double?,
     use75Percent: Boolean,
     gasStationName: String
 ): String {
     if (alcoholPrice == null || gasolinePrice == null) {
-        return "Por favor, insira valores válidos para ambos os combustíveis."
+        return context.getString(R.string.calculation_error_invalid_values)
     }
 
     if (alcoholPrice <= 0 || gasolinePrice <= 0) {
-        return "Os preços devem ser maiores que zero."
+        return context.getString(R.string.calculation_error_zero_values)
     }
 
     val threshold = if (use75Percent) 75.0 else 70.0
     val ratio = (alcoholPrice / gasolinePrice) * 100.0
     val ratioFormatted = String.format(BR_LOCALE, "%.1f", ratio)
-    val stationInfo = if (gasStationName.isNotBlank()) " no posto $gasStationName" else ""
+    val stationInfo = if (gasStationName.isNotBlank()) {
+        context.getString(R.string.calculation_station_info, gasStationName)
+    } else {
+        ""
+    }
 
     return when {
         ratio <= threshold -> {
-            "✅ Abasteça com ÁLCOOL$stationInfo!\n" +
-                    "O álcool está ${ratioFormatted}% do preço da gasolina, " +
-                    "abaixo do limite de ${(threshold).toInt()}%."
+            context.getString(
+                R.string.calculation_result_alcohol,
+                stationInfo,
+                ratioFormatted,
+                threshold.toInt() )
         }
 
         else -> {
-            "✅ Abasteça com GASOLINA$stationInfo!\n" +
-                    "O álcool está ${ratioFormatted}% do preço da gasolina, " +
-                    "acima do limite de ${(threshold).toInt()}%."
+            context.getString(
+                R.string.calculation_result_gasoline,
+                stationInfo,
+                ratioFormatted,
+                threshold.toInt() )
         }
     }
 }
 
-fun convPrecoBR(value: String): Double? {
+fun parsePriceBr(value: String): Double? {
     return try {
-        val formatador = NumberFormat.getInstance(BR_LOCALE)
-        formatador.parse(value)?.toDouble()
+        val formater = NumberFormat.getInstance(BR_LOCALE)
+        formater.parse(value)?.toDouble()
     } catch (e: ParseException) {
         null
     }

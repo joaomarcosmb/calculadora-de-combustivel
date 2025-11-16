@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Fuel Calculator</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+    <string name="open">Open</string>
+    <string name="gasoline">Gasoline</string>
+    <string name="alcohol">Alcohol</string>
+
+    <string name="screen_home">Home</string>
+    <string name="screen_stations">Stations</string>
+
+    <string name="home_title">Fuel Calculator</string>
+    <string name="home_alcohol_price_label">Alcohol price ($)</string>
+    <string name="home_gasoline_price_label">Gasoline price ($)</string>
+    <string name="home_station_name_label">Station name</string>
+    <string name="home_station_location_label">Station location</string>
+    <string name="home_use_my_location_desc">Use my location</string>
+    <string name="home_calculate_button">Calculate</string>
+    <string name="home_update_station_button">Update station</string>
+    <string name="home_add_station_fab_desc">Add station</string>
+
+    <string name="list_title">Registered Stations</string>
+    <string name="list_empty_message">No stations registered yet.</string>
+    <string name="list_alcohol_price">Alcohol: %1$s</string>
+    <string name="list_gasoline_price">Gasoline: %1$s</string>
+    <string name="list_edit_station_desc">Edit station</string>
+    <string name="list_delete_station_desc">Delete station</string>
+    <string name="list_delete_dialog_title">Delete station?</string>
+    <string name="list_delete_dialog_message">Do you really want to delete %1$s?</string>
+    <string name="list_delete_dialog_default_name">this station</string>
+
+    <string name="default_station_name">Unnamed Station</string>
+    <string name="default_station_location">Location not provided</string>
+    <string name="toast_location_error">Could not get location.</string>
+    <string name="toast_location_permission_missing">Location permission missing.</string>
+    <string name="toast_location_permission_denied">Location permission denied.</string>
+    <string name="toast_station_deleted">Station deleted.</string>
+    <string name="toast_station_no_location">This station does not have an available location.</string>
+    <string name="toast_no_maps_app">No map application available.</string>
+    <string name="toast_invalid_values">Enter valid values to save the station.</string>
+    <string name="toast_station_limit_reached">Limit of %1$d stations reached.</string>
+    <string name="toast_station_saved">Station saved successfully!</string>
+    <string name="toast_station_updated">Station updated!</string>
+    <string name="dialog_open_maps_title">Open location</string>
+    <string name="dialog_open_maps_message">Do you want to see this station in the maps application?</string>
+
+    <string name="calculation_error_invalid_values">Please enter valid values for both fuels.</string>
+    <string name="calculation_error_zero_values">Prices must be greater than zero.</string>
+    <string name="calculation_station_info"> at %1$s station</string>
+    <string name="calculation_result_alcohol">✅ Fill up with ALCOHOL%1$s!\nAlcohol is %2$s%% of the gasoline price, below the %3$d%% limit.</string>
+    <string name="calculation_result_gasoline">✅ Fill up with GASOLINE%1$s!\nAlcohol is %2$s%% of the gasoline price, above the %3$d%% limit.</string>
+</resources>

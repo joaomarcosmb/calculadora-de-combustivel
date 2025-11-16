@@ -1,3 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Calculadora de Combustivel</string>
+    <string name="app_name">Calculadora de Combustível</string>
+    <string name="cancel">Cancelar</string>
+    <string name="delete">Excluir</string>
+    <string name="open">Abrir</string>
+    <string name="gasoline">Gasolina</string>
+    <string name="alcohol">Álcool</string>
+
+    <string name="screen_home">Início</string>
+    <string name="screen_stations">Postos</string>
+
+    <string name="home_title">Calculadora de Combustível</string>
+    <string name="home_alcohol_price_label">Preço do álcool (R$)</string>
+    <string name="home_gasoline_price_label">Preço da gasolina (R$)</string>
+    <string name="home_station_name_label">Nome do posto</string>
+    <string name="home_station_location_label">Localização do posto</string>
+    <string name="home_use_my_location_desc">Usar minha localização</string>
+    <string name="home_calculate_button">Calcular</string>
+    <string name="home_update_station_button">Atualizar posto</string>
+    <string name="home_add_station_fab_desc">Adicionar posto</string>
+
+    <string name="list_title">Postos cadastrados</string>
+    <string name="list_empty_message">Nenhum posto cadastrado ainda.</string>
+    <string name="list_alcohol_price">Álcool: %1$s</string>
+    <string name="list_gasoline_price">Gasolina: %1$s</string>
+    <string name="list_edit_station_desc">Editar posto</string>
+    <string name="list_delete_station_desc">Excluir posto</string>
+    <string name="list_delete_dialog_title">Excluir posto?</string>
+    <string name="list_delete_dialog_message">Deseja realmente excluir %1$s?</string>
+    <string name="list_delete_dialog_default_name">este posto</string>
+
+    <string name="default_station_name">Posto sem nome</string>
+    <string name="default_station_location">Localização não informada</string>
+    <string name="toast_location_error">Não foi possível obter a localização.</string>
+    <string name="toast_location_permission_missing">Permissão de localização ausente.</string>
+    <string name="toast_location_permission_denied">Permissão de localização negada.</string>
+    <string name="toast_station_deleted">Posto excluído.</string>
+    <string name="toast_station_no_location">Este posto não possui localização disponível.</string>
+    <string name="toast_no_maps_app">Nenhum aplicativo de mapas disponível.</string>
+    <string name="toast_invalid_values">Informe valores válidos para salvar o posto.</string>
+    <string name="toast_station_limit_reached">Limite de %1$d postos atingido.</string>
+    <string name="toast_station_saved">Posto salvo com sucesso!</string>
+    <string name="toast_station_updated">Posto atualizado!</string>
+    <string name="dialog_open_maps_title">Abrir localização</string>
+    <string name="dialog_open_maps_message">Deseja ver este posto no aplicativo de mapas?</string>
+
+    <string name="calculation_error_invalid_values">Por favor, insira valores válidos para ambos os combustíveis.</string>
+    <string name="calculation_error_zero_values">Os preços devem ser maiores que zero.</string>
+    <string name="calculation_station_info"> no posto %1$s</string>
+    <string name="calculation_result_alcohol">✅ Abasteça com ÁLCOOL%1$s!\nO álcool está %2$s%% do preço da gasolina, abaixo do limite de %3$d%%.</string>
+    <string name="calculation_result_gasoline">✅ Abasteça com GASOLINA%1$s!\nO álcool está %2$s%% do preço da gasolina, acima do limite de %3$d%%.</string>
 </resources>

@@ -33,6 +33,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.LocalContext
 
 @Composable
 fun StationListScreen(
@@ -43,6 +45,7 @@ fun StationListScreen(
     contentPadding: PaddingValues
 ) {
     var stationPendingDeletion by remember { mutableStateOf<GasStation?>(null) }
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -52,7 +55,7 @@ fun StationListScreen(
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
         Text(
-            text = "Postos cadastrados",
+            text = stringResource(R.string.list_title),
             fontSize = 24.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.primary
@@ -60,7 +63,7 @@ fun StationListScreen(
 
         if (stations.isEmpty()) {
             Text(
-                text = "Nenhum posto cadastrado ainda.",
+                text = stringResource(R.string.list_empty_message),
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         } else {
@@ -93,21 +96,22 @@ fun StationListScreen(
                                     fontWeight = FontWeight.SemiBold
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
-                                Text(text = "Álcool: ${formatCurrencyBR(station.alcoholPrice)}")
-                                Text(text = "Gasolina: ${formatCurrencyBR(station.gasolinePrice)}")
+
+                                Text(text = stringResource(R.string.list_alcohol_price, formatCurrencyBR(station.alcoholPrice)))
+                                Text(text = stringResource(R.string.list_gasoline_price, formatCurrencyBR(station.gasolinePrice)))
                             }
 
                             Row(horizontalArrangement = Arrangement.spacedBy((-10).dp)) {
                                 IconButton(onClick = { onEdit(station) }) {
                                     Icon(
                                         imageVector = Icons.Filled.Edit,
-                                        contentDescription = "Editar posto"
+                                        contentDescription = stringResource(R.string.list_edit_station_desc)
                                     )
                                 }
                                 IconButton(onClick = { stationPendingDeletion = station }) {
                                     Icon(
                                         imageVector = Icons.Filled.Delete,
-                                        contentDescription = "Excluir posto"
+                                        contentDescription = stringResource(R.string.list_delete_station_desc)
                                     )
                                 }
                             }
@@ -119,12 +123,16 @@ fun StationListScreen(
     }
 
     stationPendingDeletion?.let { station ->
+        val stationName = station.name.ifBlank {
+            stringResource(R.string.list_delete_dialog_default_name)
+        }
+
         AlertDialog(
             onDismissRequest = { stationPendingDeletion = null },
-            title = { Text(text = "Excluir posto?") },
+            title = { Text(text = stringResource(R.string.list_delete_dialog_title)) },
             text = {
                 Text(
-                    text = "Deseja realmente excluir ${station.name.ifBlank { "este posto" }}?"
+                    text = stringResource(R.string.list_delete_dialog_message, stationName)
                 )
             },
             confirmButton = {
@@ -134,12 +142,12 @@ fun StationListScreen(
                         stationPendingDeletion = null
                     }
                 ) {
-                    Text(text = "Excluir")
+                    Text(text = stringResource(R.string.delete))
                 }
             },
             dismissButton = {
                 TextButton(onClick = { stationPendingDeletion = null }) {
-                    Text(text = "Cancelar")
+                    Text(text = stringResource(R.string.cancel))
                 }
             }
         )
