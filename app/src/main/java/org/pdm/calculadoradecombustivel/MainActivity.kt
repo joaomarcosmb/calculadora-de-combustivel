@@ -62,14 +62,42 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
 import java.util.UUID
+import java.math.BigDecimal
+import java.math.BigInteger
+import java.math.RoundingMode
 import kotlin.coroutines.resume
 import androidx.core.net.toUri
 import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
-val BR_LOCALE: Locale = Locale.Builder()
-    .setLanguage("pt")
-    .setRegion("BR")
-    .build()
+
+val APP_LOCALE: Locale
+    get() {
+        val defaultLocale = Locale.getDefault()
+        return if (defaultLocale == Locale.ROOT) {
+            Locale.Builder()
+                .setLanguage("pt")
+                .setRegion("BR")
+                .build()
+        } else {
+            defaultLocale
+        }
+    }
+
+fun currencySymbol(locale: Locale = APP_LOCALE): String {
+    return runCatching {
+        NumberFormat.getCurrencyInstance(locale).currency?.getSymbol(locale)
+    }.getOrNull() ?: "R$"
+}
+
+private fun defaultPriceText(locale: Locale = APP_LOCALE): String = formatPriceInput("0", locale)
+
+fun formatPriceFromDouble(value: Double, locale: Locale = APP_LOCALE): String {
+    val sanitizedValue = if (value.isFinite() && value >= 0.0) value else 0.0
+    val cents = BigDecimal.valueOf(sanitizedValue)
+        .movePointRight(2)
+        .setScale(0, RoundingMode.HALF_UP)
+    return formatPriceInput(cents.toPlainString(), locale)
+}
 
 private const val MAX_STATIONS = 10
 
@@ -142,7 +170,7 @@ private suspend fun resolveAddressFromCoordinates(
     longitude: Double
 ): String = withContext(Dispatchers.IO) {
     runCatching {
-        val geocoder = Geocoder(context, BR_LOCALE)
+        val geocoder = Geocoder(context, APP_LOCALE)
         val results = geocoder.getFromLocationCompat(latitude, longitude, 1)
         val address = results?.firstOrNull()
         address?.let {
@@ -154,7 +182,7 @@ private suspend fun resolveAddressFromCoordinates(
                 it.adminArea
             ).joinToString(", ")
         }
-    }.getOrNull() ?: String.format(BR_LOCALE, "%.5f, %.5f", latitude, longitude)
+    }.getOrNull() ?: String.format(APP_LOCALE, "%.5f, %.5f", latitude, longitude)
 }
 
 private suspend fun Geocoder.getFromLocationCompat(
@@ -185,21 +213,21 @@ private suspend fun Geocoder.getFromLocationCompat(
 }
 
 fun formatCurrencyBR(value: Double): String {
-    val formatter = NumberFormat.getCurrencyInstance(BR_LOCALE)
+    val formatter = NumberFormat.getCurrencyInstance(APP_LOCALE)
     return formatter.format(value)
 }
 
-private fun formatNumberForInput(value: Double): String {
-    val formatter = NumberFormat.getNumberInstance(BR_LOCALE).apply {
+fun formatPriceInput(rawValue: String, locale: Locale = APP_LOCALE): String {
+    val digitsOnly = rawValue.filter(Char::isDigit)
+    val centsValue = digitsOnly.takeIf { it.isNotEmpty() }?.let { BigInteger(it) } ?: BigInteger.ZERO
+    val amount = BigDecimal(centsValue, 2)
+
+    val formatter = NumberFormat.getNumberInstance(locale).apply {
         minimumFractionDigits = 2
-        maximumFractionDigits = 3
+        maximumFractionDigits = 2
+        isGroupingUsed = false
     }
-    return formatter.format(value)
-}
-
-fun formatDateBR(timestamp: Long): String {
-    val formatter = SimpleDateFormat("dd/MM/yyyy HH:mm", BR_LOCALE)
-    return formatter.format(Date(timestamp))
+    return formatter.format(amount)
 }
 
 class MainActivity : ComponentActivity() {
@@ -223,9 +251,11 @@ fun CalculadoraDeCombustivelScreen() {
     val context = LocalContext.current
     val dataStore = remember { context.fuelDataStore }
     val coroutineScope = rememberCoroutineScope()
+    val defaultPriceDisplay = remember { defaultPriceText() }
+    val pricePrefix = remember { currencySymbol() }
 
-    var alcoholPrice by rememberSaveable { mutableStateOf("") }
-    var gasolinePrice by rememberSaveable { mutableStateOf("") }
+    var alcoholPrice by rememberSaveable { mutableStateOf(defaultPriceDisplay) }
+    var gasolinePrice by rememberSaveable { mutableStateOf(defaultPriceDisplay) }
     var gasStationName by rememberSaveable { mutableStateOf("") }
     var gasStationLocation by rememberSaveable { mutableStateOf("") }
     var use75Percent by rememberSaveable { mutableStateOf(false) }
@@ -366,8 +396,8 @@ fun CalculadoraDeCombustivelScreen() {
     }
 
     fun resetForm() {
-        alcoholPrice = ""
-        gasolinePrice = ""
+        alcoholPrice = defaultPriceDisplay
+        gasolinePrice = defaultPriceDisplay
         gasStationName = ""
         gasStationLocation = ""
         editingStationId = null
@@ -381,8 +411,8 @@ fun CalculadoraDeCombustivelScreen() {
         editingStationId = station.id
         gasStationName = station.name
         gasStationLocation = station.location
-        alcoholPrice = formatNumberForInput(station.alcoholPrice)
-        gasolinePrice = formatNumberForInput(station.gasolinePrice)
+        alcoholPrice = formatPriceFromDouble(station.alcoholPrice)
+        gasolinePrice = formatPriceFromDouble(station.gasolinePrice)
         resultMessage = ""
         stationPendingMap = null
         navigateTo(AppScreen.HOME)
@@ -500,10 +530,15 @@ fun CalculadoraDeCombustivelScreen() {
         when (currentScreen) {
             AppScreen.HOME -> {
                 HomeScreen(
+                    pricePrefix = pricePrefix,
                     alcoholPrice = alcoholPrice,
-                    onAlcoholPriceChange = { alcoholPrice = it },
+                    onAlcoholPriceChange = { input ->
+                        alcoholPrice = formatPriceInput(input)
+                    },
                     gasolinePrice = gasolinePrice,
-                    onGasolinePriceChange = { gasolinePrice = it },
+                    onGasolinePriceChange = { input ->
+                        gasolinePrice = formatPriceInput(input)
+                    },
                     gasStationName = gasStationName,
                     onGasStationNameChange = { gasStationName = it },
                     gasStationLocation = gasStationLocation,
@@ -607,7 +642,7 @@ fun calculateBestFuel(
 
     val threshold = if (use75Percent) 75.0 else 70.0
     val ratio = (alcoholPrice / gasolinePrice) * 100.0
-    val ratioFormatted = String.format(BR_LOCALE, "%.1f", ratio)
+    val ratioFormatted = String.format(APP_LOCALE, "%.1f", ratio)
     val stationInfo = if (gasStationName.isNotBlank()) {
         context.getString(R.string.calculation_station_info, gasStationName)
     } else {
@@ -635,7 +670,7 @@ fun calculateBestFuel(
 
 fun parsePriceBr(value: String): Double? {
     return try {
-        val formater = NumberFormat.getInstance(BR_LOCALE)
+        val formater = NumberFormat.getInstance(APP_LOCALE)
         formater.parse(value)?.toDouble()
     } catch (e: ParseException) {
         null

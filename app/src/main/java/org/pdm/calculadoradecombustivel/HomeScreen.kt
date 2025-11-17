@@ -32,6 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import org.pdm.calculadoradecombustivel.ui.theme.extendedColors
@@ -39,6 +41,7 @@ import androidx.compose.ui.res.stringResource
 
 @Composable
 fun HomeScreen(
+    pricePrefix: String,
     alcoholPrice: String,
     onAlcoholPriceChange: (String) -> Unit,
     gasolinePrice: String,
@@ -88,6 +91,8 @@ fun HomeScreen(
                     label = { Text(stringResource(R.string.home_alcohol_price_label)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
+                    prefix = { Text(pricePrefix) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline
@@ -100,6 +105,8 @@ fun HomeScreen(
                     label = { Text(stringResource(R.string.home_gasoline_price_label)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
+                    prefix = { Text(pricePrefix) },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedBorderColor = MaterialTheme.colorScheme.primary,
                         unfocusedBorderColor = MaterialTheme.colorScheme.outline
