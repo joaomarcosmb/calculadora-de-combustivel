@@ -16,7 +16,8 @@ import androidx.compose.ui.graphics.Color
 
 data class ExtendedColors(
     val dangerButtonBackground: Color,
-    val neutralButtonContent: Color
+    val neutralButtonContent: Color,
+    val mainButtonContent: Color
 )
 
 private val LightColorScheme = lightColorScheme(
@@ -47,12 +48,14 @@ private val DarkColorScheme = darkColorScheme(
 
 private val LightExtendedColors = ExtendedColors(
     dangerButtonBackground = DangerButtonLight,
-    neutralButtonContent = NeutralButtonContentLight
+    neutralButtonContent = NeutralButtonContentLight,
+    mainButtonContent = MainButtonContentLight
 )
 
 private val DarkExtendedColors = ExtendedColors(
     dangerButtonBackground = DangerButtonDark,
-    neutralButtonContent = NeutralButtonContentDark
+    neutralButtonContent = NeutralButtonContentDark,
+    mainButtonContent = MainButtonContentDark
 )
 
 private val LocalExtendedColors = staticCompositionLocalOf { LightExtendedColors }

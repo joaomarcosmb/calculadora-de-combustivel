@@ -11,13 +11,13 @@
     <string name="screen_stations">Stations</string>
 
     <string name="home_title">Fuel Calculator</string>
-    <string name="home_alcohol_price_label">Alcohol price ($)</string>
-    <string name="home_gasoline_price_label">Gasoline price ($)</string>
+    <string name="home_alcohol_price_label">Alcohol ($)</string>
+    <string name="home_gasoline_price_label">Gasoline ($)</string>
     <string name="home_station_name_label">Station name</string>
     <string name="home_station_location_label">Station location</string>
     <string name="home_use_my_location_desc">Use my location</string>
     <string name="home_calculate_button">Calculate</string>
-    <string name="home_update_station_button">Update station</string>
+    <string name="home_update_station_button">Update</string>
     <string name="home_add_station_fab_desc">Add station</string>
 
     <string name="list_title">Registered Stations</string>
@@ -48,6 +48,6 @@
     <string name="calculation_error_invalid_values">Please enter valid values for both fuels.</string>
     <string name="calculation_error_zero_values">Prices must be greater than zero.</string>
     <string name="calculation_station_info"> at %1$s station</string>
-    <string name="calculation_result_alcohol">✅ Fill up with ALCOHOL%1$s!\nAlcohol is %2$s%% of the gasoline price, below the %3$d%% limit.</string>
-    <string name="calculation_result_gasoline">✅ Fill up with GASOLINE%1$s!\nAlcohol is %2$s%% of the gasoline price, above the %3$d%% limit.</string>
+    <string name="calculation_result_alcohol">Fill up with ALCOHOL%1$s!\nAlcohol is %2$s%% of the gasoline price, below the %3$d%% limit.</string>
+    <string name="calculation_result_gasoline">Fill up with GASOLINE%1$s!\nAlcohol is %2$s%% of the gasoline price, above the %3$d%% limit.</string>
 </resources>

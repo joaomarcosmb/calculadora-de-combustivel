@@ -30,6 +30,7 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -148,10 +149,10 @@ fun HomeScreen(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = if (use75Percent) "75%" else "70%",
+                    text = "70%",
                     fontSize = 18.sp,
                     fontWeight = FontWeight.SemiBold
                 )
@@ -164,7 +165,14 @@ fun HomeScreen(
                         checkedTrackColor = MaterialTheme.colorScheme.primaryContainer,
                         uncheckedThumbColor = MaterialTheme.colorScheme.secondary,
                         uncheckedTrackColor = MaterialTheme.colorScheme.secondaryContainer
-                    )
+                    ),
+                    modifier = Modifier.padding(10.dp, 0.dp)
+                )
+
+                Text(
+                    text = "75%",
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.SemiBold
                 )
             }
 
@@ -183,6 +191,7 @@ fun HomeScreen(
                         } else {
                             MaterialTheme.colorScheme.secondary
                         },
+                        contentColor = MaterialTheme.extendedColors.mainButtonContent
                     )
                 ) {
                     Text(
@@ -199,7 +208,8 @@ fun HomeScreen(
                             .weight(1f)
                             .height(48.dp),
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.tertiary
+                            containerColor = MaterialTheme.colorScheme.tertiary,
+                            contentColor = Color.Black
                         )
                     ) {
                         Text(
