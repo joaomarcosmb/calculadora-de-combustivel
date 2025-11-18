@@ -15,9 +15,13 @@ Aplicativo Android desenvolvido em Kotlin com Jetpack Compose para ajudar motori
 - **Persistência de estado**: inputs e seleção sobrevivem a reconfigurações graças ao uso de `rememberSaveable`.
 - **Tema refinado**: novas cores para claro/escuro (`PrimaryLight/Dark`, `SecondaryLight/Dark`, etc.) e componentes estilizados.
 
+## Demonstração em Vídeo
+[▶️ Assista ao vídeo](previews/Preview_APP_Video.mp4)
+
 ## Pré-visualizações
 ![Abertura](previews/Preview_APP_Opening.png)
 ![Tela principal](previews/Preview_APP_Home.png)
+![Tela principal](previews/Preview_APP_DarkMode_English.png)
 ![Resultado do cálculo](previews/Preview_APP_Result.png)
 
 ## Stack e Ferramentas
@@ -145,3 +149,10 @@ Há dois conjuntos de strings localizadas (`values/strings.xml` e `values-en/str
 ```
 
 As traduções são aplicadas automaticamente via `stringResource(...)`, respeitando o idioma configurado no sistema.
+
+Além disso, o app segue boas práticas completas de i18n:
+
+- **Nenhum texto hard-coded** nos Composables — todo conteúdo textual encontra-se em recursos traduzíveis.
+- **Formatação numérica compatível com região**, utilizando `NumberFormat.getInstance(Locale.getDefault())` para garantir separador decimal correto em cada idioma.
+- **Arquitetura preparada para novas traduções**, permitindo adicionar facilmente `values-es/`, `values-fr/` e outros idiomas sem alterar o código.
+- **Suporte natural à mudança de idioma do sistema**: ao trocar a linguagem no Android, o Compose recompõe a interface e exibe a tradução correspondente.
