@@ -58,8 +58,6 @@ import org.pdm.calculadoradecombustivel.data.fuelDataStore
 import org.pdm.calculadoradecombustivel.ui.theme.CalculadoraDeCombustivelTheme
 import java.text.NumberFormat
 import java.text.ParseException
-import java.text.SimpleDateFormat
-import java.util.Date
 import java.util.Locale
 import java.util.UUID
 import java.math.BigDecimal
