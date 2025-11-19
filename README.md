@@ -19,10 +19,23 @@ Aplicativo Android desenvolvido em Kotlin com Jetpack Compose para ajudar motori
 [▶️ Assista ao vídeo](previews/Preview_APP_Video.mp4)
 
 ## Pré-visualizações
-![Abertura](previews/Preview_APP_Opening.png)
-![Tela principal](previews/Preview_APP_Home.png)
-![Tela principal](previews/Preview_APP_Home_Dark.png)
-![Resultado do cálculo](previews/Preview_APP_Result.png)
+### Abertura da aplicação
+<img src="https://github.com/joaomarcosmb/calculadora-de-combustivel/blob/master/previews/Preview_APP_Opening.png" width="300" height="800">
+
+### Home (Dark - English)
+<img src="https://github.com/joaomarcosmb/calculadora-de-combustivel/blob/master/previews/Preview_APP_Home_Dark.png" width="300" height="800">
+
+### Resultado (Dark - English)
+<img src="https://github.com/joaomarcosmb/calculadora-de-combustivel/blob/master/previews/Preview_APP_Home_Dark_Result.png" width="300" height="800">
+
+### Lista de postos (Dark - English)
+<img src="https://github.com/joaomarcosmb/calculadora-de-combustivel/blob/master/previews/Preview_APP_Station_List.jpeg" width="300" height="800">
+
+### Edição de infos de um posto (Dark - English)
+<img src="https://github.com/joaomarcosmb/calculadora-de-combustivel/blob/master/previews/Preview_APP_Home_Editing.jpeg" width="300" height="800">
+
+### Deleção de um posto (Dark - English)
+<img src="https://github.com/joaomarcosmb/calculadora-de-combustivel/blob/master/previews/Preview_APP_Delete_Station.jpeg" width="300" height="800">
 
 ## Stack e Ferramentas
 - Kotlin 2.0.21
