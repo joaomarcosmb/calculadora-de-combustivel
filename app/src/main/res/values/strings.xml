@@ -48,6 +48,6 @@
     <string name="calculation_error_invalid_values">Por favor, insira valores válidos para ambos os combustíveis.</string>
     <string name="calculation_error_zero_values">Os preços devem ser maiores que zero.</string>
     <string name="calculation_station_info"> no posto %1$s</string>
-    <string name="calculation_result_alcohol">Abasteça com ÁLCOOL%1$s! O álcool está %2$s%% do preço da gasolina, abaixo do limite de %3$d%%.</string>
-    <string name="calculation_result_gasoline">Abasteça com GASOLINA%1$s!\nO álcool está %2$s%% do preço da gasolina, acima do limite de %3$d%%.</string>
+    <string name="calculation_result_alcohol">Abasteça com ÁLCOOL %1$s\nO álcool está %2$s%% do preço da gasolina, abaixo do limite de %3$d%%.</string>
+    <string name="calculation_result_gasoline">Abasteça com GASOLINA %1$s\nO álcool está %2$s%% do preço da gasolina, acima do limite de %3$d%%.</string>
 </resources>
