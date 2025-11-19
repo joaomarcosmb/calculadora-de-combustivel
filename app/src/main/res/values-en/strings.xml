@@ -48,6 +48,6 @@
     <string name="calculation_error_invalid_values">Please enter valid values for both fuels.</string>
     <string name="calculation_error_zero_values">Prices must be greater than zero.</string>
     <string name="calculation_station_info"> at %1$s station</string>
-    <string name="calculation_result_alcohol">Fill up with ALCOHOL %1$s\nAlcohol is %2$s%% of the gasoline price, below the %3$d%% limit.</string>
-    <string name="calculation_result_gasoline">Fill up with GASOLINE %1$s\nAlcohol is %2$s%% of the gasoline price, above the %3$d%% limit.</string>
+    <string name="calculation_result_alcohol">Fill up with ALCOHOL %1$s.\nAlcohol is %2$s%% of the gasoline price, below the %3$d%% limit.</string>
+    <string name="calculation_result_gasoline">Fill up with GASOLINE %1$s.\nAlcohol is %2$s%% of the gasoline price, above the %3$d%% limit.</string>
 </resources>

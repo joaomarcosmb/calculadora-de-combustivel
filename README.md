@@ -21,7 +21,7 @@ Aplicativo Android desenvolvido em Kotlin com Jetpack Compose para ajudar motori
 ## Pré-visualizações
 ![Abertura](previews/Preview_APP_Opening.png)
 ![Tela principal](previews/Preview_APP_Home.png)
-![Tela principal](previews/Preview_APP_DarkMode_English.png)
+![Tela principal](previews/Preview_APP_Home_Dark.png)
 ![Resultado do cálculo](previews/Preview_APP_Result.png)
 
 ## Stack e Ferramentas
