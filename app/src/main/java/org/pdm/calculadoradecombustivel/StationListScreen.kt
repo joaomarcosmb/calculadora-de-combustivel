@@ -47,6 +47,8 @@ fun StationListScreen(
     var stationPendingDeletion by remember { mutableStateOf<GasStation?>(null) }
     val context = LocalContext.current
 
+    val currentLocale = context.resources.configuration.locales[0]
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -97,8 +99,8 @@ fun StationListScreen(
                                 )
                                 Spacer(modifier = Modifier.height(8.dp))
 
-                                Text(text = stringResource(R.string.list_alcohol_price, formatCurrencyBR(station.alcoholPrice)))
-                                Text(text = stringResource(R.string.list_gasoline_price, formatCurrencyBR(station.gasolinePrice)))
+                                Text(text = stringResource(R.string.list_alcohol_price, formatCurrencyBR(station.alcoholPrice, currentLocale)))
+                                Text(text = stringResource(R.string.list_gasoline_price, formatCurrencyBR(station.gasolinePrice, currentLocale)))
                             }
 
                             Row(horizontalArrangement = Arrangement.spacedBy((-10).dp)) {
