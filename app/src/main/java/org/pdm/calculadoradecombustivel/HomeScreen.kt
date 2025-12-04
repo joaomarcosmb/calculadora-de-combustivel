@@ -30,7 +30,6 @@ import androidx.compose.material3.FloatingActionButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.ui.text.input.KeyboardType
@@ -61,6 +60,20 @@ fun HomeScreen(
     onClearForm: () -> Unit,
     contentPadding: PaddingValues
 ) {
+    val textFieldColors = OutlinedTextFieldDefaults.colors(
+        focusedBorderColor = MaterialTheme.extendedColors.neutralButtonContent,
+        unfocusedBorderColor = MaterialTheme.extendedColors.neutralButtonContent.copy(alpha = 0.7f),
+        focusedLabelColor = MaterialTheme.colorScheme.primary,
+        unfocusedLabelColor = MaterialTheme.colorScheme.onSurface,
+        focusedTextColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
+        cursorColor = MaterialTheme.colorScheme.primary,
+        focusedPrefixColor = MaterialTheme.colorScheme.onSurface,
+        unfocusedPrefixColor = MaterialTheme.colorScheme.onSurface,
+        focusedTrailingIconColor = MaterialTheme.colorScheme.primary,
+        unfocusedTrailingIconColor = MaterialTheme.colorScheme.onSurface
+    )
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -93,10 +106,7 @@ fun HomeScreen(
                     singleLine = true,
                     prefix = { Text(pricePrefix) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
+                    colors = textFieldColors
                 )
 
                 OutlinedTextField(
@@ -107,10 +117,7 @@ fun HomeScreen(
                     singleLine = true,
                     prefix = { Text(pricePrefix) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = MaterialTheme.colorScheme.primary,
-                        unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                    )
+                    colors = textFieldColors
                 )
             }
 
@@ -120,10 +127,7 @@ fun HomeScreen(
                 label = { Text(stringResource(R.string.home_station_name_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                )
+                colors = textFieldColors
             )
 
             OutlinedTextField(
@@ -147,10 +151,7 @@ fun HomeScreen(
                         }
                     }
                 },
-                colors = OutlinedTextFieldDefaults.colors(
-                    focusedBorderColor = MaterialTheme.colorScheme.primary,
-                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                )
+                colors = textFieldColors
             )
 
             Row(
@@ -198,7 +199,11 @@ fun HomeScreen(
                         } else {
                             MaterialTheme.colorScheme.secondary
                         },
-                        contentColor = MaterialTheme.extendedColors.mainButtonContent
+                        contentColor = if (isEditing) {
+                            MaterialTheme.extendedColors.neutralButtonContent
+                        } else {
+                            MaterialTheme.extendedColors.mainButtonContent
+                        }
                     )
                 ) {
                     Text(
@@ -216,7 +221,7 @@ fun HomeScreen(
                             .height(48.dp),
                         colors = ButtonDefaults.buttonColors(
                             containerColor = MaterialTheme.colorScheme.tertiary,
-                            contentColor = Color.Black
+                            contentColor = MaterialTheme.extendedColors.mainButtonContent
                         )
                     ) {
                         Text(

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -87,6 +88,9 @@ fun StationListScreen(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
+                            val stationName = station.name.ifBlank {
+                                stringResource(R.string.default_station_name)
+                            }
                             Column(
                                 modifier = Modifier
                                     .weight(1f)
@@ -103,17 +107,29 @@ fun StationListScreen(
                                 Text(text = stringResource(R.string.list_gasoline_price, formatCurrencyBR(station.gasolinePrice, currentLocale)))
                             }
 
-                            Row(horizontalArrangement = Arrangement.spacedBy((-10).dp)) {
-                                IconButton(onClick = { onEdit(station) }) {
+                            Row(horizontalArrangement = Arrangement.spacedBy(0.dp)) {
+                                IconButton(
+                                    onClick = { onEdit(station) },
+                                    modifier = Modifier.size(48.dp)
+                                ) {
                                     Icon(
                                         imageVector = Icons.Filled.Edit,
-                                        contentDescription = stringResource(R.string.list_edit_station_desc)
+                                        contentDescription = stringResource(
+                                            R.string.list_edit_station_desc,
+                                            stationName
+                                        )
                                     )
                                 }
-                                IconButton(onClick = { stationPendingDeletion = station }) {
+                                IconButton(
+                                    onClick = { stationPendingDeletion = station },
+                                    modifier = Modifier.size(48.dp)
+                                ) {
                                     Icon(
                                         imageVector = Icons.Filled.Delete,
-                                        contentDescription = stringResource(R.string.list_delete_station_desc)
+                                        contentDescription = stringResource(
+                                            R.string.list_delete_station_desc,
+                                            stationName
+                                        )
                                     )
                                 }
                             }

@@ -24,8 +24,8 @@
     <string name="list_empty_message">Nenhum posto cadastrado ainda.</string>
     <string name="list_alcohol_price">Álcool: %1$s</string>
     <string name="list_gasoline_price">Gasolina: %1$s</string>
-    <string name="list_edit_station_desc">Editar posto</string>
-    <string name="list_delete_station_desc">Excluir posto</string>
+    <string name="list_edit_station_desc">Editar posto %1$s</string>
+    <string name="list_delete_station_desc">Excluir posto %1$s</string>
     <string name="list_delete_dialog_title">Excluir posto?</string>
     <string name="list_delete_dialog_message">Deseja realmente excluir %1$s?</string>
     <string name="list_delete_dialog_default_name">este posto</string>
